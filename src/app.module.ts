@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { TestModule } from './modules/test/test.module';
 import { QuestionModule } from './modules/question/question.module';
+import { AttemptModule } from './modules/attempt/attempt.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { QuestionModule } from './modules/question/question.module';
     }),
     TestModule,
     QuestionModule,
+    AttemptModule,
   ],
   providers: [
     {

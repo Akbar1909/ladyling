@@ -23,8 +23,20 @@ export class TestController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  findAll() {
-    return this.testService.findAll();
+  findMany() {
+    return this.testService.findMany();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get(':id')
+  findById(@Param('id') id: string) {
+    return this.testService.findById(+id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('questions/:id')
+  findByIdWithQuestions(@Param('id') id: string) {
+    return this.testService.findByIdWithQuestions(+id);
   }
 
   @HttpCode(HttpStatus.OK)

@@ -10,8 +10,23 @@ export class TestService {
     return this.prisma.test.create({ data: body });
   }
 
-  async findAll() {
-    return this.prisma.test.findMany();
+  async findMany() {
+    const tests = this.prisma.test.findMany({
+      include: { _count: { select: { questions: true } } },
+    });
+
+    return tests;
+  }
+
+  async findById(id: number) {
+    return this.prisma.test.findUnique({ where: { id } });
+  }
+
+  async findByIdWithQuestions(id: number) {
+    return this.prisma.test.findUnique({
+      where: { id },
+      include: { questions: { include: { options: true } } },
+    });
   }
 
   async deleteById(id: number) {
