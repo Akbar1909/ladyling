@@ -13,7 +13,7 @@ export class AttemptController {
 
   @Post('start/:testId')
   create(@Param('testId') testId: number) {
-    return this.attemptService.create(+testId, 1);
+    return this.attemptService.create(+testId);
   }
 
   @Post('finish')

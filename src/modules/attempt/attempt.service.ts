@@ -10,7 +10,7 @@ import { FinishAttemptDto } from './dto';
 export class AttemptService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(testId: number, userId: number) {
+  async create(testId: number, userId?: number) {
     const test = await this.prisma.test.findUnique({ where: { id: testId } });
 
     if (!test) {
