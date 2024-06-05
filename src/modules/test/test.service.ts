@@ -12,7 +12,7 @@ export class TestService {
 
   async findMany() {
     const tests = this.prisma.test.findMany({
-      include: { _count: { select: { questions: true } } },
+      include: { _count: { select: { questions: true, attempts: true } } },
     });
 
     return tests;
