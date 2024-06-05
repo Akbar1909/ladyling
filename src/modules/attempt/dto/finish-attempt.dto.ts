@@ -13,6 +13,9 @@ export class FinishAttemptDto {
   @IsNumber()
   attemptId: number;
 
+  @IsNumber()
+  spendedTime: number;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SelectedOptionDto)

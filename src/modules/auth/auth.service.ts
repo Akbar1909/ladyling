@@ -13,6 +13,7 @@ import { UserCreateDto } from '../users/dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { getAutoFilledModelFields } from 'src/utils/autoFilledModelProperties';
+import { EnterDto } from './dto/enter.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,18 +23,18 @@ export class AuthService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async validateUser(email: UserEntity['email']): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(username: UserEntity['username']): Promise<any> {
+    const user = await this.usersService.findByPhoneUsername(username);
 
     return user;
   }
 
   async signin(dto: LoginDto) {
-    const user: UserEntity = await this.validateUser(dto.email);
+    const user: UserEntity = await this.validateUser(dto.username);
 
     if (!user) {
       throw new NotFoundException({
-        message: `User with the provided ${dto.email} does not exist`,
+        message: `User with the provided ${dto.username} does not exist`,
       });
     }
 
@@ -48,13 +49,33 @@ export class AuthService {
     return this.getToken(user);
   }
 
+  async enter(body: EnterDto) {
+    const user = await this.prisma.user.findFirst({
+      where: { username: body.username, phoneNumber: body.phoneNumber },
+    });
+
+    if (user) {
+      return this.getToken(user);
+    }
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        username: body.username,
+        phoneNumber: body.phoneNumber,
+        password: '',
+      },
+    });
+
+    return this.getToken(newUser);
+  }
+
   async signup(user: UserCreateDto) {
-    const pre = await this.validateUser(user.email);
+    const pre = await this.validateUser(user.username);
 
     if (pre) {
       throw new HttpException(
         {
-          message: `User with the ${user.email} is already exist`,
+          message: `User with the ${user.username} is already exist`,
         },
         HttpStatus.CONFLICT,
       );
@@ -74,7 +95,7 @@ export class AuthService {
   }
 
   async getToken(user: any) {
-    const payload = { username: user.username, sub: user.userId };
+    const payload = { username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
     };

@@ -10,7 +10,8 @@ import { FinishAttemptDto } from './dto';
 export class AttemptService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(testId: number, userId?: number) {
+  async create(testId: number, userId: number) {
+    console.log({ testId, userId });
     const test = await this.prisma.test.findUnique({ where: { id: testId } });
 
     if (!test) {
@@ -18,13 +19,15 @@ export class AttemptService {
     }
 
     if (test.status === 'active') {
-      return this.prisma.attempt.create({ data: { testId, userId } });
+      return this.prisma.attempt.create({
+        data: { testId, userId, spendedTime: 0 },
+      });
     }
 
     return new ForbiddenException('not allowed');
   }
 
-  async finish({ attemptId, questions }: FinishAttemptDto) {
+  async finish({ attemptId, questions, spendedTime }: FinishAttemptDto) {
     const options = await this.prisma.option.findMany({
       where: {
         questionId: {
@@ -49,6 +52,7 @@ export class AttemptService {
     const updatedRecord = await this.prisma.attempt.update({
       where: { id: attemptId },
       data: {
+        spendedTime,
         responses: {
           createMany: {
             data: questions.map(({ id, selectedId }) => {
@@ -69,6 +73,9 @@ export class AttemptService {
             }),
           },
         },
+      },
+      include: {
+        responses: true,
       },
     });
 
@@ -97,6 +104,8 @@ export class AttemptService {
         },
       },
     });
+
+    console.log(res);
 
     const correctCount = res?.responses.filter(
       (response) => response.selectedId === response.correctId,
