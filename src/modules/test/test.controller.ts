@@ -40,7 +40,7 @@ export class TestController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Delete()
+  @Delete(':id')
   deleteById(@Param('id') id: string) {
     return this.testService.deleteById(+id);
   }
