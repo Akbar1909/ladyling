@@ -11,6 +11,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { TestModule } from './modules/test/test.module';
 import { QuestionModule } from './modules/question/question.module';
 import { AttemptModule } from './modules/attempt/attempt.module';
+import { LeaderBoardModule } from './modules/leaderboard/leaderboard.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AttemptModule } from './modules/attempt/attempt.module';
     TestModule,
     QuestionModule,
     AttemptModule,
+    LeaderBoardModule,
   ],
   providers: [
     {

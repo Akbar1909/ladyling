@@ -10,109 +10,122 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
-  id  Int @id @default(autoincrement())
-  username String
-  password String
-  phoneNumber String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  attempts Attempt[]
+model User {
+  id               Int                @id @default(autoincrement())
+  username         String
+  password         String
+  phoneNumber      String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  attempts         Attempt[]
+  leaderboard      LeadBoard[]
 
-  @@unique([username,phoneNumber])
+  @@unique([username, phoneNumber])
 }
 
-model Test{
-  id Int @id @default(autoincrement())
-  name String
-  description String?
-  startDate Int?
-  endDate   Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  status  TestStatus @default(upcoming)
-  questions Question[]
-  attempts Attempt[]
+model Test {
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String?
+  startDate        Int?
+  endDate          Int?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  status           TestStatus         @default(upcoming)
+  questions        Question[]
+  attempts         Attempt[]
+  leaderboard      LeadBoard[]
 }
 
-model Question{
-  id Int @id @default(autoincrement())
-  testId Int
-  text String
-  imageUrl String?
-  options Option[]
-  test Test @relation(fields: [testId],references: [id])
-  createdAt DateTime @default(now())
-  updateAt DateTime @updatedAt
+model Question {
+  id        Int        @id @default(autoincrement())
+  testId    Int
+  text      String
+  imageUrl  String?
+  options   Option[]
+  test      Test       @relation(fields: [testId], references: [id])
+  createdAt DateTime   @default(now())
+  updateAt  DateTime   @updatedAt
   responses Response[]
 }
 
-model Option{
-  id Int @id @default(autoincrement())
-  questionId Int
-  text String
-  label String
-  isCorrect Boolean
-  question Question @relation(fields: [questionId],references: [id])
-  @@unique([questionId,id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Option {
+  id                Int        @id @default(autoincrement())
+  questionId        Int
+  text              String
+  label             String
+  isCorrect         Boolean
+  question          Question   @relation(fields: [questionId], references: [id])
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
   responsesSelected Response[] @relation(name: "selectedOption")
   responsesCorrect  Response[] @relation(name: "correctOption")
+
+  @@unique([questionId, id])
 }
 
-
-model Attempt{
-  id Int @id @default(autoincrement())
-  userId Int
-  testId Int
-  spendedTime Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user User? @relation(fields: [userId],references: [id])
-  test Test @relation(fields: [testId],references: [id])
-  responses Response[]
+model Attempt {
+  id             Int        @id @default(autoincrement())
+  userId         Int
+  testId         Int
+  spendedTime    Int
+  isFirstAttempt Boolean    @default(false)
+  correctCount   Int        @default(0)
+  totalCount     Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  user           User?      @relation(fields: [userId], references: [id])
+  test           Test       @relation(fields: [testId], references: [id])
+  responses      Response[]
 }
 
-model Response{
-  id Int @id @default(autoincrement())
-  attempId Int
+model Response {
+  id         Int      @id @default(autoincrement())
+  attempId   Int
   questionId Int
   selectedId Int
-  correctId Int
-  isCorrect Boolean
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  attempt Attempt @relation(fields: [attempId],references: [id])
-  question Question @relation(fields: [questionId],references: [id])
-  selected Option @relation(name: "selectedOption",fields: [selectedId],references: [id])
-  correct Option @relation(name: "correctOption",fields: [correctId],references: [id])
-  @@unique([attempId,questionId])
+  correctId  Int
+  isCorrect  Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  attempt    Attempt  @relation(fields: [attempId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id])
+  selected   Option   @relation(name: "selectedOption", fields: [selectedId], references: [id])
+  correct    Option   @relation(name: "correctOption", fields: [correctId], references: [id])
+
+  @@unique([attempId, questionId])
 }
 
-
-
-model AssetLibrary{
-  mediaId Int @id @default(autoincrement())
-  filename String
+model AssetLibrary {
+  mediaId      Int     @id @default(autoincrement())
+  filename     String
   originalName String
-  mimetype String
-  size Int
-  filePath String
-  viewUrl String? @default("")
-  aspectRatio Float? @default(1)
-  updatedAt Int
-  createdAt Int
+  mimetype     String
+  size         Int
+  filePath     String
+  viewUrl      String? @default("")
+  aspectRatio  Float?  @default(1)
+  updatedAt    Int
+  createdAt    Int
 }
 
-enum TestStatus{
+model LeadBoard {
+  id          Int      @id @default(autoincrement())
+  testId      Int
+  userId      Int
+  score       Int
+  spendedTime Int
+  rank        Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  test        Test     @relation(fields: [testId], references: [id])
+
+  @@unique([testId, userId])
+}
+
+enum TestStatus {
   active
   upcoming
   closed
 }
-
-
-
-
-
-

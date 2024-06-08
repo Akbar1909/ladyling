@@ -5,14 +5,21 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FinishAttemptDto } from './dto';
+import { LeaderboardService } from '../leaderboard/leaderboard.service';
 
 @Injectable()
 export class AttemptService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly leaderboardService: LeaderboardService,
+  ) {}
 
   async create(testId: number, userId: number) {
-    console.log({ testId, userId });
     const test = await this.prisma.test.findUnique({ where: { id: testId } });
+
+    const prevAttempts = await this.prisma.attempt.findMany({
+      where: { testId, userId },
+    });
 
     if (!test) {
       return new NotFoundException('test not found');
@@ -20,7 +27,12 @@ export class AttemptService {
 
     if (test.status === 'active') {
       return this.prisma.attempt.create({
-        data: { testId, userId, spendedTime: 0 },
+        data: {
+          testId,
+          userId,
+          spendedTime: 0,
+          isFirstAttempt: prevAttempts.length === 0,
+        },
       });
     }
 
@@ -49,10 +61,15 @@ export class AttemptService {
       }
     > = options.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {});
 
+    const correctCount = questions.filter(
+      ({ selectedId }) => optionsMap[selectedId].isCorrect,
+    ).length;
+
     const updatedRecord = await this.prisma.attempt.update({
       where: { id: attemptId },
       data: {
         spendedTime,
+        correctCount,
         responses: {
           createMany: {
             data: questions.map(({ id, selectedId }) => {
@@ -78,6 +95,15 @@ export class AttemptService {
         responses: true,
       },
     });
+
+    if (updatedRecord.isFirstAttempt) {
+      await this.leaderboardService.createOne({
+        testId: updatedRecord.testId,
+        userId: updatedRecord.userId,
+        score: updatedRecord.correctCount,
+        spendedTime: updatedRecord.spendedTime,
+      });
+    }
 
     return updatedRecord;
   }
@@ -105,18 +131,12 @@ export class AttemptService {
       },
     });
 
-    console.log(res);
-
-    const correctCount = res?.responses.filter(
-      (response) => response.selectedId === response.correctId,
-    ).length;
-
     const totalCount = res?.test.questions.length;
 
     return {
-      correctCount,
-      totalCount,
+      correctCount: res?.correctCount,
       ...res,
+      totalCount,
     };
   }
 }

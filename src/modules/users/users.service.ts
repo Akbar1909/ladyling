@@ -10,6 +10,10 @@ export class UsersService {
   update() {}
   delete() {}
 
+  async findMe(id: number) {
+    return await this.prisma.user.findUnique({ where: { id } });
+  }
+
   async findByPhoneUsername(username: UserEntity['username']) {
     return await this.prisma.user.findFirst({ where: { username } });
   }

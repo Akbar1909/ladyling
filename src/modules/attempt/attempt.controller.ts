@@ -13,7 +13,6 @@ export class AttemptController {
   @Get('details/:id')
   @Public()
   findByIdWithDetails(@Param('id') id: string) {
-    console.log({ id });
     return this.attemptService.findByIdWithDetails(+id);
   }
 

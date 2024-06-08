@@ -7,9 +7,11 @@ import {
   Patch,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { User } from 'src/decorators/user.decorator';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -22,9 +24,9 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get('one')
-  findOne() {
-    return 'only one';
+  @Get('me')
+  findMe(@User() user: any) {
+    return this.usersService.findMe(+user.userId);
   }
 
   @HttpCode(HttpStatus.CREATED)
