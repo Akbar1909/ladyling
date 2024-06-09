@@ -7,9 +7,11 @@ import {
   Get,
   Delete,
   Param,
+  Put,
 } from '@nestjs/common';
 import { TestService } from './test.service';
 import { TestCreateDto } from './dto';
+import { TestStatusEnum } from './models';
 
 @Controller('test')
 export class TestController {
@@ -31,6 +33,15 @@ export class TestController {
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.testService.findById(+id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Put(':id')
+  updateStatus(
+    @Param('id') id: string,
+    @Body() body: { status: TestStatusEnum },
+  ) {
+    return this.testService.updateStatus(+id, body.status);
   }
 
   @HttpCode(HttpStatus.OK)

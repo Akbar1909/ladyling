@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TestCreateDto } from './dto';
+import { TestStatusEnum } from './models';
 
 @Injectable()
 export class TestService {
@@ -20,6 +21,15 @@ export class TestService {
 
   async findById(id: number) {
     return this.prisma.test.findUnique({ where: { id } });
+  }
+
+  async updateStatus(id: number, status: TestStatusEnum) {
+    const updatedRecord = await this.prisma.test.update({
+      where: { id },
+      data: { status },
+    });
+
+    return updatedRecord;
   }
 
   async findByIdWithQuestions(id: number) {
