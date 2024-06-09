@@ -6,6 +6,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FinishAttemptDto } from './dto';
 import { LeaderboardService } from '../leaderboard/leaderboard.service';
+import { calculateDifference } from 'src/utils/time';
 
 @Injectable()
 export class AttemptService {
@@ -25,7 +26,7 @@ export class AttemptService {
       return new NotFoundException('test not found');
     }
 
-    if (test.status === 'active') {
+    if (test.status === 'active' || test.status === 'withPrize') {
       return this.prisma.attempt.create({
         data: {
           testId,
@@ -65,10 +66,14 @@ export class AttemptService {
       ({ selectedId }) => optionsMap[selectedId].isCorrect,
     ).length;
 
+    const record = await this.prisma.attempt.findUnique({
+      where: { id: attemptId },
+    });
+
     const updatedRecord = await this.prisma.attempt.update({
       where: { id: attemptId },
       data: {
-        spendedTime,
+        spendedTime: calculateDifference(record?.createdAt as any),
         correctCount,
         responses: {
           createMany: {

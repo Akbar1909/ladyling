@@ -128,4 +128,5 @@ enum TestStatus {
   active
   upcoming
   closed
+  withPrize
 }

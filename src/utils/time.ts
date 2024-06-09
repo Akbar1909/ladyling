@@ -31,4 +31,16 @@ export function getUnixCurrentTime() {
   return dayjs().unix();
 }
 
+export const calculateDifference = (createdAt: string) => {
+  // Given date
+  const givenDate = dayjs(createdAt);
+
+  // Current date
+  const currentDate = dayjs();
+
+  const differenceInSeconds = currentDate.diff(givenDate, 'second');
+
+  return differenceInSeconds;
+};
+
 export default dayjs;
