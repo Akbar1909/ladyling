@@ -26,6 +26,10 @@ export class AttemptService {
       return new NotFoundException('test not found');
     }
 
+    if (test.status === 'withPrize' && prevAttempts.length !== 0) {
+      return new ForbiddenException('already tried');
+    }
+
     if (test.status === 'active' || test.status === 'withPrize') {
       return this.prisma.attempt.create({
         data: {
@@ -143,5 +147,15 @@ export class AttemptService {
       ...res,
       totalCount,
     };
+  }
+
+  async getSpendedTime(id: number) {
+    const record = await this.prisma.attempt.findUnique({ where: { id } });
+
+    if (!record) {
+      return new NotFoundException('record not found');
+    }
+
+    return calculateDifference(record.createdAt as any);
   }
 }

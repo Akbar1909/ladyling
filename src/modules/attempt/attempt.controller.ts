@@ -10,6 +10,11 @@ import { Public } from 'src/decorators/public.decorator';
 export class AttemptController {
   constructor(private readonly attemptService: AttemptService) {}
 
+  @Get('spended-time/:id')
+  getSpendedTime(@Param('id') id: string) {
+    return this.attemptService.getSpendedTime(+id);
+  }
+
   @Get('details/:id')
   @Public()
   findByIdWithDetails(@Param('id') id: string) {
