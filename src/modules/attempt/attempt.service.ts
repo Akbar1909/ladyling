@@ -44,7 +44,7 @@ export class AttemptService {
     return new ForbiddenException('not allowed');
   }
 
-  async finish({ attemptId, questions, spendedTime }: FinishAttemptDto) {
+  async finish({ attemptId, questions }: FinishAttemptDto) {
     const options = await this.prisma.option.findMany({
       where: {
         questionId: {
@@ -149,6 +149,13 @@ export class AttemptService {
     };
   }
 
+  async findMany(testId: number) {
+    return await this.prisma.attempt.findMany({
+      where: { testId },
+      include: { user: true },
+    });
+  }
+
   async getSpendedTime(id: number) {
     const record = await this.prisma.attempt.findUnique({ where: { id } });
 
@@ -157,5 +164,9 @@ export class AttemptService {
     }
 
     return calculateDifference(record.createdAt as any);
+  }
+
+  async deleteOneById(id: number) {
+    await this.prisma.attempt.delete({ where: { id } });
   }
 }

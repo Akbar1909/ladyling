@@ -1,4 +1,12 @@
-import { Controller, Param, Post, Body, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Param,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Delete,
+} from '@nestjs/common';
 import { AttemptService } from './attempt.service';
 import { FinishAttemptDto } from './dto';
 import { User } from 'src/decorators/user.decorator';
@@ -9,6 +17,12 @@ import { Public } from 'src/decorators/public.decorator';
 @UseGuards(AuthGuard)
 export class AttemptController {
   constructor(private readonly attemptService: AttemptService) {}
+
+  @Get(':testId')
+  @Public()
+  findMany(@Param('testId') testId: string) {
+    return this.attemptService.findMany(+testId);
+  }
 
   @Get('spended-time/:id')
   getSpendedTime(@Param('id') id: string) {
@@ -29,5 +43,11 @@ export class AttemptController {
   @Post('finish')
   finish(@Body() body: FinishAttemptDto) {
     return this.attemptService.finish(body);
+  }
+
+  @Delete(':id')
+  @Public()
+  deleteOne(@Param('id') id: string) {
+    return this.attemptService.deleteOneById(+id);
   }
 }
